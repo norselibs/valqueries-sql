@@ -125,23 +125,27 @@ public class ValqueriesCrudRepositoryImpl<T, K> implements ValqueriesCrudReposit
 		Set<Object> manyToManyRelations = new HashSet<>();
 
 		for(O t : ts) {
-			if (!relationDescriber.getRelationAnnotation().autoSave()) {
-				return;
-			}
+
+
 //			if (!(t instanceof Mapping)) {
 //				throw new RuntimeException("Valqueries models should have a @Mapper annotation");
 //			}
 //			Mapping mapping = (Mapping) t;
 			Object relation = factory.mappingHelper.getRelation(t, relationDescriber.getField());
-
 			if (relation != null) {
-				manyToManyRelations.addAll(relationsHelper.getManyToManyRelations(relationDescriber, t, relation, via));
-				if(relationDescriber.isCollectionRelation()) {
-					objectsToSave.addAll((Collection<Object>) relation);
-				} else {
-					objectsToSave.add(relation);
+				if (relationDescriber.getRelationAnnotation().via() != None.class) {
+
+					manyToManyRelations.addAll(relationsHelper.getManyToManyRelations(relationDescriber, t, relation, via));
+				}
+				if (relationDescriber.getRelationAnnotation().autoSave()) {
+					if (relationDescriber.isCollectionRelation()) {
+						objectsToSave.addAll((Collection<Object>) relation);
+					} else {
+						objectsToSave.add(relation);
+					}
 				}
 			}
+
 		}
 
 		if(!objectsToSave.isEmpty()) {

@@ -833,6 +833,32 @@ public abstract class AutoMapperBaseTests {
 	}
 
 	@Test
+	@TestClasses({Bike.class, BikeGear.class, AuxiliaryBikeGearBike.class})
+	public void save_onlySaveViaRelation() {
+		Bike bike = factory.get(Bike.class);
+		bike.setId(UUID.randomUUID().toString());
+		bike.setBikeType(BikeType.Mountain);
+		bike.setWheelSize(20);
+
+		BikeGear gear = factory.get(BikeGear.class);
+		gear.setGearNum(8);
+		gear.setGearSerial("s1");
+		bike.getAuxiliaryGears().add(gear);
+
+		bikeRepository.doRetryableInTransaction(tx -> {
+			bikeRepository.saveOther(tx, gear, BikeGear.class);
+			gear.setGearSerial("s2");
+			bikeRepository.save(tx, bike);
+		});
+
+
+		Bike actual = bikeRepository.get(bike.getId()).orElseThrow(RuntimeException::new);
+		assertEquals(bike.getId(), actual.getId());
+		assertEquals(1, actual.getAuxiliaryGears().size());
+		assertEquals("s1", actual.getAuxiliaryGears().get(0).getGearSerial());
+	}
+
+	@Test
 	@TestClasses({Bike.class, BikeGear.class, BikeGearBike.class})
 	public void queryOtherClass() {
 		Bike bike = factory.get(Bike.class);

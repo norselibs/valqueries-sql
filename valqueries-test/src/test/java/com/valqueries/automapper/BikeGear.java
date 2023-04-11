@@ -11,6 +11,8 @@ public class BikeGear {
 	@PrimaryKey
 	int gearNum;
 
+	private String gearSerial;
+
 	@Relation(collectionElementType = Bike.class, via = BikeGearBike.class)
 	private List<Bike> bike;
 
@@ -28,5 +30,13 @@ public class BikeGear {
 
 	public void setBike(List<Bike> bike) {
 		this.bike = bike;
+	}
+
+	public String getGearSerial() {
+		return gearSerial;
+	}
+
+	public void setGearSerial(String gearSerial) {
+		this.gearSerial = gearSerial;
 	}
 }
